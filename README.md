@@ -1,2 +1,2 @@
 # Project-Sokoban
- Rendition of the game Sokoban
+Puzzle game for University.
