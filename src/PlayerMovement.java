@@ -59,20 +59,20 @@ public class PlayerMovement {
 
 
     private class MoveCharacter extends AbstractAction {
-        int nextX;
-        int nextY;
-        int forward;
-        int right;
+        private int nextX;
+        private int nextY;
+        private int down;
+        private int right;
 
         /**
          * Sets variables to be used in actionPerformed.
-         * @param forward -1 = up, 1 = down.
+         * @param down -1 = up, 1 = down.
          * @param right -1 = left, 1 = right.
          */
-        MoveCharacter(int forward, int right) {
+        private MoveCharacter(int down, int right) {
             this.nextX = x + right;
-            this.nextY = y + forward;
-            this.forward = forward;
+            this.nextY = y + down;
+            this.down = down;
             this.right = right;
         }
 
@@ -88,10 +88,10 @@ public class PlayerMovement {
             Tile player = mapping.get(new Coords(x, y));
 
             if (tile.bPushable) {
-                Tile pushCheckWall = mapping.get(new Coords(nextX + right, nextY + forward));
+                Tile pushCheckWall = mapping.get(new Coords(nextX + right, nextY + down));
 
                 if (!pushCheckWall.bBlocked && !(pushCheckWall instanceof Box)) {
-                    mapping.put(new Coords(nextX + right, nextY + forward), tile);
+                    mapping.put(new Coords(nextX + right, nextY + down), tile);
                     mapping.put(new Coords(nextX, nextY), player);
                     mapping.put(new Coords(x, y), new Floor(false, false));
                     gui.populateWorld(mapping, PlayerMovement.this);
