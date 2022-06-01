@@ -12,7 +12,7 @@ public class Map {
      * @param level current level game is on.
      * @return returns hashmap with tile placement by coordinate.
      */
-    public HashMap<Coords,Tile> loadMap(int level) {
+    public HashMap<Coords,Tile> loadMap(int level, PlayerMovement movement) {
         HashMap<Coords, Tile> mapping = null;
         FileReader fr;
 
@@ -41,16 +41,21 @@ public class Map {
                     case 'B':
                         mapping.put(new Coords(x, y), new Box(true, false));
                         break;
-                    case 'C':
-                        mapping.put(new Coords(x, y), new Coin(false, true));
+                    case 'D':
+                        mapping.put(new Coords(x, y), new Diamond(false, false));
+                        movement.addTnt();
                         break;
                     case 'P':
                         mapping.put(new Coords(x, y), new Player(false, false));
+                        break;
+                    case '\r':
                         break;
                     case '\n':
                         x = 0;
                         y += 1;
                         continue;
+                    default:
+                        throw new RuntimeException("Invalid tile type: " + (char)i + " at x: " + x + " y: " + y);
                 }
                 x += 1;
             }

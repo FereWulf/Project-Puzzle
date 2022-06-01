@@ -24,7 +24,7 @@ public class Game {
     }
 
     public void world() {
-        HashMap<Coords, Tile> mapping = map.loadMap(level);
+        HashMap<Coords, Tile> mapping = map.loadMap(level, movement);
 
         gui.populateWorld(mapping, movement);
         movement.setMap(mapping, gui, this);
@@ -32,6 +32,8 @@ public class Game {
 
     public void nextLevel() {
         level += 1;
+        movement.clearTallies();
+        gui.clearMoves();
         world();
     }
 }

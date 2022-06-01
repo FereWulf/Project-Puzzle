@@ -4,6 +4,9 @@ import tiles.Box;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class PlayerMovement {
 
@@ -13,9 +16,16 @@ public class PlayerMovement {
     private static final String MOVE_DOWN = "move down";
     private static final String MOVE_LEFT = "move left";
     private static final String MOVE_RIGHT = "move right";
+    private static final String RESTART = "restart";
 
     private int x;
     private int y;
+
+    private int currentTnt;
+    private int totalTnt;
+    private int moves;
+
+    private Tile priorTile;
 
     private HashMap<Coords, Tile> mapping;
     private GameGUI gui;
@@ -30,6 +40,16 @@ public class PlayerMovement {
         this.mapping = mapping;
         this.gui = gui;
         this.game = game;
+    }
+
+    public void addTnt() {
+        totalTnt += 1;
+    }
+
+    public void clearTallies() {
+        currentTnt = 0;
+        totalTnt = 0;
+        moves = 0;
     }
 
     /**
@@ -55,6 +75,17 @@ public class PlayerMovement {
         component.getActionMap().put(MOVE_DOWN, new MoveCharacter(1, 0));
         component.getActionMap().put(MOVE_LEFT, new MoveCharacter(0, -1));
         component.getActionMap().put(MOVE_RIGHT, new MoveCharacter(0, 1));
+
+
+        component.getInputMap(windowFocus).put(KeyStroke.getKeyStroke("R"), RESTART);
+
+        component.getActionMap().put(RESTART, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                clearTallies();
+                game.world();
+            }
+        });
     }
 
 
@@ -78,7 +109,7 @@ public class PlayerMovement {
 
         /**
          * Checks if the player can move onto the next tile before moving character.
-         * Also checks if player moves into coin (diamond), they go to next level.
+         * Also checks if player moves into diamond, they go to next level.
          * @param e the event to be processed.
          */
         @Override
@@ -88,22 +119,48 @@ public class PlayerMovement {
             Tile player = mapping.get(new Coords(x, y));
 
             if (tile.bPushable) {
-                Tile pushCheckWall = mapping.get(new Coords(nextX + right, nextY + down));
+                Tile pushCheck = mapping.get(new Coords(nextX + right, nextY + down));
 
-                if (!pushCheckWall.bBlocked && !(pushCheckWall instanceof Box)) {
+                if (pushCheck instanceof Diamond && tile instanceof Box) {
+                    currentTnt += 1;
+
+                    mapping.put(new Coords(nextX + right, nextY + down), new Tnt(false, true));
+                    mapping.put(new Coords(nextX, nextY), player);
+                    retile(tile);
+
+                    gui.populateWorld(mapping, PlayerMovement.this);
+
+                    if (currentTnt == totalTnt) {
+                        gui.showMoves(moves);
+
+                        final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
+                        executorService.schedule(() -> { game.nextLevel(); }, 3, TimeUnit.SECONDS);
+                    }
+                } else if (!pushCheck.bBlocked && !(pushCheck instanceof Box)) {
                     mapping.put(new Coords(nextX + right, nextY + down), tile);
                     mapping.put(new Coords(nextX, nextY), player);
-                    mapping.put(new Coords(x, y), new Floor(false, false));
+                    retile(tile);
                     gui.populateWorld(mapping, PlayerMovement.this);
                 }
             } else if (!tile.bBlocked) {
                 mapping.put(new Coords(nextX, nextY), player);
-                mapping.put(new Coords(x, y), new Floor(false, false));
+                retile(tile);
                 gui.populateWorld(mapping, PlayerMovement.this);
             }
+        }
 
-            if (tile instanceof Coin) {
-                game.nextLevel();
+        private void retile(Tile tile) {
+            moves += 1;
+            if (priorTile == null) {
+                mapping.put(new Coords(x, y), new Floor(false, false));
+            } else {
+                mapping.put(new Coords(x, y), priorTile);
+            }
+
+            if (!(tile instanceof Box)) {
+                priorTile = tile;
+            } else {
+                priorTile = new Floor(false, false);
             }
         }
     }

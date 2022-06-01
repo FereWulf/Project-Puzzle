@@ -2,29 +2,34 @@ import tiles.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.HashMap;
 
 public class GameGUI extends JFrame {
 
     private final JFrame frame = new JFrame("GameGUI");
-    private JPanel window = new JPanel();
+    private JLayeredPane layerPanels = new JLayeredPane();
+
+    private JPanel gamePanel = new JPanel();
     private JLabel[][] gridDisplayPoints = new JLabel[12][12];
+
+    private JPanel movesPanel = new JPanel();
+    private JLabel movesTxt = new JLabel();
 
     /**
      * Sets bounds and displays window.
      */
     public void display() {
-        frame.setPreferredSize(new Dimension(400, 400));
+        frame.setPreferredSize(new Dimension(416, 440));
 
         GridLayout grid = new GridLayout();
         grid.setRows(12);
         grid.setColumns(12);
-        window.setSize(400, 400);
-        window.setLayout(grid);
+        gamePanel.setSize(400, 400);
+        gamePanel.setLayout(grid);
 
-        frame.setContentPane(window);
+        layerPanels.add(gamePanel, 0, 0);
+
+        frame.setContentPane(layerPanels);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.pack();
         frame.setResizable(false);
@@ -42,13 +47,13 @@ public class GameGUI extends JFrame {
                 Icon image = new ImageIcon(getClass().getResource(square.getImage()));
 
                 if (gridDisplayPoints[i][j] != null) {
-                    window.remove(gridDisplayPoints[i][j]);
+                    gamePanel.remove(gridDisplayPoints[i][j]);
                 }
 
                 gridDisplayPoints[i][j] = new JLabel();
                 gridDisplayPoints[i][j].setIcon(image);
                 gridDisplayPoints[i][j].setHorizontalAlignment(JLabel.CENTER);
-                window.add(gridDisplayPoints[i][j]);
+                gamePanel.add(gridDisplayPoints[i][j]);
 
                 if (square instanceof Player) {
                     movement.setPlayerCoords(j, i);
@@ -57,5 +62,20 @@ public class GameGUI extends JFrame {
             }
         }
         frame.setVisible(true);
+    }
+
+    public void showMoves(int moves) {
+        movesTxt.setText("<html><div style='text-align: center; color: white;'>Congratulations! You completed <br> this level in <span style='color: #62ed32;'>" + moves + "</span> moves</div><html>");
+
+        movesPanel.setLayout(new GridBagLayout());
+        movesPanel.setSize(398,397);
+        movesPanel.setBackground(new Color(0, 0, 0, 0.5f));
+        movesPanel.add(movesTxt);
+
+        layerPanels.add(movesPanel, 1, 1);
+    }
+
+    public void clearMoves() {
+        layerPanels.remove(movesPanel);
     }
 }
