@@ -1,5 +1,7 @@
 package tiles;
 
+// Box class inherits from tile.
+// Stores box image file location for map load.
 public class Box extends Tile {
     private final String ImageLocation =  "/tiles/images/box.jpg";
 

@@ -9,6 +9,7 @@ public class Map {
 
     /**
      * Reads current level file and maps each letter to respective tile type.
+     * On new line, it resets x value and adds one to y.
      * @param level current level game is on.
      * @return returns hashmap with tile placement by coordinate.
      */
@@ -17,6 +18,7 @@ public class Map {
         FileReader fr;
 
         try {
+            // Checks if file location exists. If the game goes past all levels that exist, it will display the end screen.
             if (new File("maps/level"+ level +".txt").isFile()) {
                 fr = new FileReader("maps/level" + level + ".txt");
             } else {
@@ -55,6 +57,7 @@ public class Map {
                         y += 1;
                         continue;
                     default:
+                        // Returns error containing x, y coord and character if level has invalid character in file.
                         throw new RuntimeException("Invalid tile type: " + (char)i + " at x: " + x + " y: " + y);
                 }
                 x += 1;

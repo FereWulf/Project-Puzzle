@@ -1,9 +1,7 @@
 import java.util.Objects;
 
-/**
- * Sets coords values as hashmap hashcode.
- */
 public class Coords {
+    // Sets coords values as a hashmap hashcode.
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -17,19 +15,17 @@ public class Coords {
         return Objects.hash(x, y);
     }
 
+    // Defining variables to store x and y of each tile.
     private int x;
     private int y;
 
+    /**
+     * Stores a tiles coordinates.
+     * @param x x point of tile.
+     * @param y y point of tile.
+     */
     public Coords(int x,int y) {
         this.x = x;
         this.y = y;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
     }
 }

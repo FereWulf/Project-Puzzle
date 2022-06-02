@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 public class GameGUI extends JFrame {
 
+    // Initialising swing objects to be used later.
     private final JFrame frame = new JFrame("GameGUI");
     private JLayeredPane layerPanels = new JLayeredPane();
 
@@ -15,9 +16,8 @@ public class GameGUI extends JFrame {
     private JPanel movesPanel = new JPanel();
     private JLabel movesTxt = new JLabel();
 
-    /**
-     * Sets bounds and displays window.
-     */
+
+    // Set bounds and displays window.
     public void display() {
         frame.setPreferredSize(new Dimension(416, 440));
 
@@ -46,6 +46,7 @@ public class GameGUI extends JFrame {
                 Tile square = mapping.get(new Coords(j, i));
                 Icon image = new ImageIcon(getClass().getResource(square.getImage()));
 
+                // Clears grid point before setting it with new tile image.
                 if (gridDisplayPoints[i][j] != null) {
                     gamePanel.remove(gridDisplayPoints[i][j]);
                 }
@@ -55,6 +56,7 @@ public class GameGUI extends JFrame {
                 gridDisplayPoints[i][j].setHorizontalAlignment(JLabel.CENTER);
                 gamePanel.add(gridDisplayPoints[i][j]);
 
+                // Checks if tile is player class so that player movement can be set up.
                 if (square instanceof Player) {
                     movement.setPlayerCoords(j, i);
                     movement.setComponent(gridDisplayPoints[i][j]);
@@ -64,7 +66,12 @@ public class GameGUI extends JFrame {
         frame.setVisible(true);
     }
 
+    /**
+     * Sets bounds and displays end of level screen with number of moves the player took to finish the level.
+     * @param moves the number of moves the player took to finish the level.
+     */
     public void showMoves(int moves) {
+        // HTML used to center text and make all the text white except for the number of moves, which is green.
         movesTxt.setText("<html><div style='text-align: center; color: white;'>Congratulations! You completed <br> this level in <span style='color: #62ed32;'>" + moves + "</span> moves</div><html>");
 
         movesPanel.setLayout(new GridBagLayout());
@@ -75,6 +82,7 @@ public class GameGUI extends JFrame {
         layerPanels.add(movesPanel, 1, 1);
     }
 
+    // Removes level end screen from displaying.
     public void clearMoves() {
         layerPanels.remove(movesPanel);
     }

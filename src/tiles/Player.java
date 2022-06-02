@@ -1,5 +1,7 @@
 package tiles;
 
+// Player class inherits from tile.
+// Stores player image file location for map load.
 public class Player extends Tile {
     private final String ImageLocation =  "/tiles/images/player.jpg";
 

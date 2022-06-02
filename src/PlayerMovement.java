@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PlayerMovement {
 
+    // Variables defined for key registering (player movement/restarting level).
     private JLabel component;
     private static final int windowFocus = JComponent.WHEN_IN_FOCUSED_WINDOW;
     private static final String MOVE_UP = "move up";
@@ -18,6 +19,7 @@ public class PlayerMovement {
     private static final String MOVE_RIGHT = "move right";
     private static final String RESTART = "restart";
 
+    // Defining variables for player movement.
     private int x;
     private int y;
 
@@ -31,21 +33,34 @@ public class PlayerMovement {
     private GameGUI gui;
     private Game game;
 
+    /**
+     * Gets the player's initial coordinates.
+     * @param x x point of player.
+     * @param y y point of player.
+     */
     public void setPlayerCoords(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
+    /**
+     * Takes in classes/hashmap to store in pre-defined variable and to use later.
+     * @param mapping map coords and tile one each coords stored in a hashmap.
+     * @param gui game gui class.
+     * @param game game class.
+     */
     public void setMap(HashMap<Coords, Tile> mapping, GameGUI gui, Game game) {
         this.mapping = mapping;
         this.gui = gui;
         this.game = game;
     }
 
+    // Called on level load to tally how many diamonds need to be turned into tnt.
     public void addTnt() {
         totalTnt += 1;
     }
 
+    // Resets tally's for next level/redo of level.
     public void clearTallies() {
         currentTnt = 0;
         totalTnt = 0;
@@ -53,7 +68,8 @@ public class PlayerMovement {
     }
 
     /**
-     * Binds movement to respective keys and MoveCharacter class function.
+     * Binds movement to respective keys and class MoveCharacter class function.
+     * Also binds restart to R key, which calls function to restart current level.
      * @param component current JLabel grid point.
      */
     public void setComponent(JLabel component) {
@@ -90,6 +106,7 @@ public class PlayerMovement {
 
 
     private class MoveCharacter extends AbstractAction {
+        // Defining variables.
         private int nextX;
         private int nextY;
         private int down;
@@ -108,20 +125,24 @@ public class PlayerMovement {
         }
 
         /**
-         * Checks if the player can move onto the next tile before moving character.
-         * Also checks if player moves into diamond, they go to next level.
+         * Function called when a player presses W, A, S or D.
          * @param e the event to be processed.
          */
         @Override
         public void actionPerformed(ActionEvent e) {
 
+            // Gets and sets current and tile the player wants to move onto.
             Tile tile = mapping.get(new Coords(nextX, nextY));
             Tile player = mapping.get(new Coords(x, y));
 
+            // Checks if the tile the player wants to move to is pushable before checking if it is blocked.
             if (tile.bPushable) {
+                // Gets tile that is a tile ahead of the tile the player wants to move to.
                 Tile pushCheck = mapping.get(new Coords(nextX + right, nextY + down));
 
+                // Checks if the player is pushing a box onto a diamond. Else, check if the player is not pushing a box into another box.
                 if (pushCheck instanceof Diamond && tile instanceof Box) {
+                    // Create tnt and add to currentTnt tally. Update map.
                     currentTnt += 1;
 
                     mapping.put(new Coords(nextX + right, nextY + down), new Tnt(false, true));
@@ -130,6 +151,7 @@ public class PlayerMovement {
 
                     gui.populateWorld(mapping, PlayerMovement.this);
 
+                    // If the player has made all diamonds into tnt, show total moves then go onto next map in 3 seconds.
                     if (currentTnt == totalTnt) {
                         gui.showMoves(moves);
 
@@ -137,18 +159,25 @@ public class PlayerMovement {
                         executorService.schedule(() -> { game.nextLevel(); }, 3, TimeUnit.SECONDS);
                     }
                 } else if (!pushCheck.bBlocked && !(pushCheck instanceof Box)) {
+                    // Update map with new box and player coords.
                     mapping.put(new Coords(nextX + right, nextY + down), tile);
                     mapping.put(new Coords(nextX, nextY), player);
                     retile(tile);
                     gui.populateWorld(mapping, PlayerMovement.this);
                 }
             } else if (!tile.bBlocked) {
+                // Update map with new player coords.
                 mapping.put(new Coords(nextX, nextY), player);
                 retile(tile);
                 gui.populateWorld(mapping, PlayerMovement.this);
             }
         }
 
+        /**
+         * Function calls whenever the player can move. Purpose is to fill the void left when the player moves with what the player was previously on (floor/diamond).
+         * Function also tallies up the total moves it took to complete the level.
+         * @param tile the tile that the player is about to occupy.
+         */
         private void retile(Tile tile) {
             moves += 1;
             if (priorTile == null) {
@@ -157,6 +186,7 @@ public class PlayerMovement {
                 mapping.put(new Coords(x, y), priorTile);
             }
 
+            // Checks if the tile the player is about to occupy was not a box so that the player does not create boxes.
             if (!(tile instanceof Box)) {
                 priorTile = tile;
             } else {
